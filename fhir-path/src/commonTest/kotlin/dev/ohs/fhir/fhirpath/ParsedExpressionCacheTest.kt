@@ -64,8 +64,8 @@ class ParsedExpressionCacheTest {
 
   @Test
   fun `caching engine returns the same results as a non-caching engine`() {
-    val cachingEngine = FhirPathEngine.forR4(cacheParsedExpressions = true)
-    val nonCachingEngine = FhirPathEngine.forR4()
+    val cachingEngine = FhirPathEngine.forR4()
+    val nonCachingEngine = FhirPathEngine.forR4 { cacheParsedExpressions = false }
 
     repeat(3) {
       for (expression in expressions) {
@@ -79,7 +79,7 @@ class ParsedExpressionCacheTest {
 
   @Test
   fun `cached expression stays correct across bases of different types`() {
-    val engine = FhirPathEngine.forR4(cacheParsedExpressions = true)
+    val engine = FhirPathEngine.forR4 { cacheParsedExpressions = true }
 
     assertEquals(listOf("Jim"), engine.evaluateExpression("given", humanName).toList())
     assertEquals(emptyList(), engine.evaluateExpression("given", patient).toList())
@@ -98,7 +98,7 @@ class ParsedExpressionCacheTest {
 
   @Test
   fun `evaluation stays correct once the cache exceeds its bound`() {
-    val engine = FhirPathEngine.forR4(cacheParsedExpressions = true)
+    val engine = FhirPathEngine.forR4 { cacheParsedExpressions = true }
 
     repeat(OVERFLOW_EXPRESSION_COUNT) {
       assertEquals(listOf("value$it"), engine.evaluateExpression("'value$it'", patient).toList())
@@ -112,7 +112,7 @@ class ParsedExpressionCacheTest {
 
   @Test
   fun `disabling the cache does not change results`() {
-    val engine = FhirPathEngine.forR4(cacheParsedExpressions = false)
+    val engine = FhirPathEngine.forR4 { cacheParsedExpressions = false }
 
     repeat(3) {
       assertEquals(

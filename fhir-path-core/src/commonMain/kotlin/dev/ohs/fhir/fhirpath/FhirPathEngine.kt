@@ -36,9 +36,13 @@ private const val MAX_CACHED_EXPRESSIONS = 1_000
 class FhirPathEngine(
   private val fhirPathTypeResolver: FhirPathTypeResolver,
   val fhirModelNavigator: FhirModelNavigator,
-  val strictMode: Boolean = false,
-  val cacheParsedExpressions: Boolean = false,
+  val config: Config = Config(),
 ) {
+  class Config {
+    var strictMode: Boolean = false
+    var cacheParsedExpressions: Boolean = true
+  }
+
   var traces: Map<String, List<TraceEntry>> = emptyMap()
     private set
 
@@ -61,7 +65,7 @@ class FhirPathEngine(
     variables: Map<String, Any?> = emptyMap(),
   ): Collection<Any> {
     val parsedExpression =
-      if (cacheParsedExpressions) {
+      if (config.cacheParsedExpressions) {
         parsedExpressionCache[expression]
           ?: parseExpression(expression).also {
             val current = parsedExpressionCache
@@ -76,7 +80,7 @@ class FhirPathEngine(
       FhirPathEvaluator(
         fhirPathTypeResolver = fhirPathTypeResolver,
         fhirModelNavigator = fhirModelNavigator,
-        strictMode = strictMode,
+        strictMode = config.strictMode,
         context = base,
         variables = variables,
       )
